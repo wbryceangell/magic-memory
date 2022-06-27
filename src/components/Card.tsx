@@ -1,20 +1,23 @@
+import { CardSourceWithId } from "../App";
 import "./Card.css";
 
 interface Props {
-  src: string;
-  handleClick: (src: string) => void;
+  card: CardSourceWithId;
+  flipped: boolean;
+  handleClick: (card: CardSourceWithId) => void;
 }
 
-const Card: React.FC<Props> = ({ src, handleClick }) => {
+const Card: React.FC<Props> = ({ card, flipped, handleClick }) => {
+  const { src } = card;
   return (
     <div className="card">
-      <div>
+      <div className={flipped ? "flipped" : ""}>
         <img src={src} className="front" alt="card front" />
         <img
           src="/img/cover.png"
           className="back"
           alt="card back"
-          onClick={() => handleClick(src)}
+          onClick={() => handleClick(card)}
         />
       </div>
     </div>

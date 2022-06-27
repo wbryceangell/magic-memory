@@ -8,8 +8,8 @@ export type CardSourceWithId = CardSource & { id: string; matched: boolean };
 function App() {
   const [cards, setCards] = useState<Array<CardSourceWithId>>([]);
   const [turns, setTurns] = useState(0);
-  const [choiceOne, setChoiceOne] = useState<string | null>(null);
-  const [choiceTwo, setChoiceTwo] = useState<string | null>(null);
+  const [choiceOne, setChoiceOne] = useState<CardSourceWithId | null>(null);
+  const [choiceTwo, setChoiceTwo] = useState<CardSourceWithId | null>(null);
 
   const newGame = () => {
     const shuffledCards: Array<CardSourceWithId> = [
@@ -26,25 +26,33 @@ function App() {
     setTurns(0);
   };
 
-  const handleClick = (src: string) =>
-    !choiceOne ? setChoiceOne(src) : setChoiceTwo(src);
+  const handleClick = (card: CardSourceWithId) =>
+    !choiceOne ? setChoiceOne(card) : setChoiceTwo(card);
 
   const compareChoices = () => {
-    if (!choiceTwo) return;
-    if (choiceOne === choiceTwo)
+    if (!choiceOne || !choiceTwo) return;
+    if (choiceOne.src === choiceTwo.src)
       setCards((cards) =>
         cards.map((card) => {
-          if (card.src === choiceOne) card.matched = true;
+          if (card.src === choiceOne.src) card.matched = true;
           return card;
         })
       );
-    nextTurn();
+    setTimeout(nextTurn, 1000);
   };
 
   const nextTurn = () => {
     setChoiceOne(null);
     setChoiceTwo(null);
     setTurns((turns) => turns + 1);
+  };
+
+  const isFlipped = (card: CardSourceWithId): boolean => {
+    return (
+      card.matched ||
+      (choiceOne !== null && card.id === choiceOne.id) ||
+      (choiceTwo !== null && card.id === choiceTwo.id)
+    );
   };
 
   useEffect(compareChoices, [choiceTwo]);
@@ -55,7 +63,12 @@ function App() {
       <button onClick={newGame}>New Game</button>
       <div className="card-grid">
         {cards.map((card) => (
-          <Card key={card.id} src={card.src} handleClick={handleClick} />
+          <Card
+            key={card.id}
+            card={card}
+            flipped={isFlipped(card)}
+            handleClick={!choiceOne || !choiceTwo ? handleClick : () => {}}
+          />
         ))}
       </div>
     </div>

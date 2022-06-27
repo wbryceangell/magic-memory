@@ -23,6 +23,7 @@ function App() {
         matched: false,
       }));
     setCards(shuffledCards);
+    resetChoices();
     setTurns(0);
   };
 
@@ -42,9 +43,13 @@ function App() {
   };
 
   const nextTurn = () => {
+    resetChoices();
+    setTurns((turns) => turns + 1);
+  };
+
+  const resetChoices = () => {
     setChoiceOne(null);
     setChoiceTwo(null);
-    setTurns((turns) => turns + 1);
   };
 
   const isFlipped = (card: CardSourceWithId): boolean => {
@@ -55,6 +60,7 @@ function App() {
     );
   };
 
+  useEffect(newGame, []);
   useEffect(compareChoices, [choiceTwo]);
 
   return (
@@ -67,10 +73,15 @@ function App() {
             key={card.id}
             card={card}
             flipped={isFlipped(card)}
-            handleClick={!choiceOne || !choiceTwo ? handleClick : () => {}}
+            handleClick={
+              (!choiceOne || !choiceTwo) && !isFlipped(card)
+                ? handleClick
+                : () => {}
+            }
           />
         ))}
       </div>
+      <p>Turns: {turns}</p>
     </div>
   );
 }

@@ -3,7 +3,7 @@ import "./App.css";
 import Card from "./components/Card";
 import cardSources, { CardSource } from "./constants/cardSources";
 
-export type CardSourceWithId = CardSource & { id: string };
+export type CardSourceWithId = CardSource & { id: string; matched: boolean };
 
 function App() {
   const [cards, setCards] = useState<Array<CardSourceWithId>>([]);
@@ -17,7 +17,11 @@ function App() {
       ...cardSources,
     ]
       .sort(() => Math.random() - 0.5)
-      .map((cardSource) => ({ ...cardSource, id: crypto.randomUUID() }));
+      .map((cardSource) => ({
+        ...cardSource,
+        id: crypto.randomUUID(),
+        matched: false,
+      }));
     setCards(shuffledCards);
     setTurns(0);
   };
@@ -25,17 +29,25 @@ function App() {
   const handleClick = (src: string) =>
     !choiceOne ? setChoiceOne(src) : setChoiceTwo(src);
 
-  useEffect(() => {
+  const compareChoices = () => {
     if (!choiceTwo) return;
-    console.log(choiceOne === choiceTwo);
+    if (choiceOne === choiceTwo)
+      setCards((cards) =>
+        cards.map((card) => {
+          if (card.src === choiceOne) card.matched = true;
+          return card;
+        })
+      );
     nextTurn();
-  }, [choiceTwo]);
+  };
 
   const nextTurn = () => {
     setChoiceOne(null);
     setChoiceTwo(null);
     setTurns((turns) => turns + 1);
   };
+
+  useEffect(compareChoices, [choiceTwo]);
 
   return (
     <div className="App">
